@@ -17,10 +17,13 @@ import { Input } from '@/components/ui/input';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export function CartPage() {
   const { items, loading, updateQuantity, removeFromCart, getTotalPrice } = useCart();
   const { addToWishlist } = useWishlist();
+  const { loading: authLoading } = useAuth();
 
   const handleMoveToWishlist = async (productId: string, itemId: string) => {
     try {
@@ -36,30 +39,8 @@ export function CartPage() {
   const shippingCost = getTotalPrice() > 999 ? 0 : 99;
   const finalTotal = getTotalPrice() + shippingCost;
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3" />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-white p-6 rounded-lg">
-                    <div className="h-4 bg-gray-200 rounded mb-2" />
-                    <div className="h-4 bg-gray-200 rounded w-2/3" />
-                  </div>
-                ))}
-              </div>
-              <div className="bg-white p-6 rounded-lg h-fit">
-                <div className="h-4 bg-gray-200 rounded mb-4" />
-                <div className="h-8 bg-gray-200 rounded" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (authLoading || loading) {
+    return <LoadingSpinner className="min-h-screen" size="lg" />;
   }
 
   return (

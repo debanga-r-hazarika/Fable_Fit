@@ -8,6 +8,8 @@ import { HeroCarousel } from '@/components/HeroCarousel';
 import { ProductCard } from '@/components/ProductCard';
 import { supabase } from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Product {
   id: string;
@@ -39,6 +41,7 @@ export function HomePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
+  const { loading: authLoading } = useAuth();
 
   useEffect(() => {
     fetchData();
@@ -106,6 +109,10 @@ export function HomePage() {
       // Show success message
     }
   };
+
+  if (authLoading || loading) {
+    return <LoadingSpinner className="min-h-screen" size="lg" />;
+  }
 
   return (
     <div className="min-h-screen w-full">

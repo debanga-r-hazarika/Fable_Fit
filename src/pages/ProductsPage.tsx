@@ -31,6 +31,7 @@ import { Slider } from '@/components/ui/slider';
 import { ProductCard } from '@/components/ProductCard';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface Product {
   id: string;
@@ -76,6 +77,7 @@ export function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [filters, setFilters] = useState<Filters>({
     category: searchParams.get('category') ? [searchParams.get('category')!] : [],
@@ -107,31 +109,33 @@ export function ProductsPage() {
         .from('categories')
         .select('*')
         .order('name');
-
+      console.log('Categories fetch result:', { data, error });
       if (error) {
-        console.error('Categories fetch error:', error);
+        setErrorMsg('Failed to load categories');
         toast.error('Failed to load categories');
-        return;
+        setCategories([]);
+      } else {
+        setCategories(data || []);
+        if (!data || data.length === 0) {
+          setErrorMsg('No categories found.');
+        }
       }
-      
-      console.log('Categories fetched:', data);
-      setCategories(data || []);
     } catch (error) {
+      setErrorMsg('Failed to load categories');
       console.error('Error fetching categories:', error);
       toast.error('Failed to load categories');
+      setCategories([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchProducts = async () => {
     try {
       console.log('Fetching products with filters:', filters);
-      
       let query = supabase
         .from('products')
-        .select(`
-          *,
-          categories(name)
-        `)
+        .select(`*, categories(name)`)
         .eq('is_active', true);
 
       // Apply filters
@@ -174,27 +178,34 @@ export function ProductsPage() {
       }
 
       const { data, error } = await query;
-
+      console.log('Products fetch result:', { data, error });
       if (error) {
-        console.error('Products fetch error:', error);
+        setErrorMsg('Failed to load products');
         toast.error('Failed to load products');
-        return;
-      }
-      
-      let filteredProducts = data || [];
-      console.log('Products fetched:', filteredProducts);
+        setProducts([]);
+      } else {
+        let filteredProducts = data || [];
+        console.log('Products fetched:', filteredProducts);
 
-      // Size filter (client-side since sizes is an array)
-      if (filters.sizes.length > 0) {
-        filteredProducts = filteredProducts.filter(product => 
-          product.sizes.some((size: string) => filters.sizes.includes(size))
-        );
-      }
+        // Size filter (client-side since sizes is an array)
+        if (filters.sizes.length > 0) {
+          filteredProducts = filteredProducts.filter(product => 
+            product.sizes.some((size: string) => filters.sizes.includes(size))
+          );
+        }
 
-      setProducts(filteredProducts);
+        setProducts(filteredProducts);
+        if (!filteredProducts || filteredProducts.length === 0) {
+          setErrorMsg('No products found.');
+        }
+      }
     } catch (error) {
+      setErrorMsg('Failed to load products');
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');
+      setProducts([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -341,24 +352,10 @@ export function ProductsPage() {
   );
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/3" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4">
-                  <div className="aspect-[3/4] bg-gray-200 rounded mb-4" />
-                  <div className="h-4 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 bg-gray-200 rounded w-2/3" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner className="min-h-screen" size="lg" />;
+  }
+  if (errorMsg) {
+    return <div className="min-h-screen flex flex-col items-center justify-center text-center text-red-600 text-lg">{errorMsg}</div>;
   }
 
   return (

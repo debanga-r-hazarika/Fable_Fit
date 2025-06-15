@@ -17,40 +17,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubscribed = false;
+    let authStateHandled = false;
+
     console.log('AuthContext: Initializing auth state...');
-    
+
+    // Listen for auth changes FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (unsubscribed) return;
+      console.log('AuthContext: Auth state changed:', event, session ? 'Session exists' : 'No session');
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (!authStateHandled) {
+        setLoading(false);
+        authStateHandled = true;
+      }
+    });
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (unsubscribed) return;
       if (error) {
         console.error('AuthContext: Error getting initial session:', error);
       } else {
         console.log('AuthContext: Initial session:', session ? 'Found' : 'None');
       }
-      
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      if (!authStateHandled) {
+        setLoading(false);
+        authStateHandled = true;
+      }
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('AuthContext: Auth state changed:', event, session ? 'Session exists' : 'No session');
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    return () => {
+      unsubscribed = true;
+      console.log('AuthContext: Cleaning up auth listener');
+      subscription.unsubscribe();
+    };
+  }, []);
 
-      // Create or update profile when user signs up or signs in
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log('AuthContext: User signed in, checking/creating profile');
+  // Handle profile creation/update when user signs in
+  useEffect(() => {
+    async function ensureProfile() {
+      if (user) {
         try {
           // Check if profile already exists
           const { data: existingProfile, error: fetchError } = await supabase
             .from('profiles')
             .select('id')
-            .eq('id', session.user.id)
+            .eq('id', user.id)
             .single();
 
           if (fetchError && fetchError.code !== 'PGRST116') {
@@ -61,13 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           // Only create profile if it doesn't exist
           if (!existingProfile) {
-            console.log('AuthContext: Creating new profile for user:', session.user.id);
+            console.log('AuthContext: Creating new profile for user:', user.id);
             const { error: insertError } = await supabase
               .from('profiles')
               .insert({
-                id: session.user.id,
-                full_name: session.user.user_metadata.full_name || '',
-                email: session.user.email || '',
+                id: user.id,
+                full_name: user.user_metadata.full_name || '',
+                email: user.email || '',
                 is_admin: false,
               });
 
@@ -84,17 +100,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('AuthContext: Unexpected error with profile:', error);
         }
       }
-
-      if (event === 'SIGNED_OUT') {
-        console.log('AuthContext: User signed out');
-      }
-    });
-
-    return () => {
-      console.log('AuthContext: Cleaning up auth listener');
-      subscription.unsubscribe();
-    };
-  }, []);
+    }
+    ensureProfile();
+  }, [user]);
 
   const signOut = async () => {
     console.log('AuthContext: Signing out user...');

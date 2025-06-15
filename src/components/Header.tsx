@@ -29,6 +29,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 const categories = [
   { name: 'Dresses', href: '/products?category=dresses' },
@@ -43,7 +44,7 @@ export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { getTotalItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
@@ -174,7 +175,9 @@ export function Header() {
               </Button>
 
               {/* User Menu */}
-              {user ? (
+              {authLoading ? (
+                <LoadingSpinner />
+              ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="hover:bg-primary-50">
@@ -359,7 +362,9 @@ export function Header() {
 
                 {/* User section */}
                 <div className="p-6 border-t border-gray-200 bg-gray-50">
-                  {user ? (
+                  {authLoading ? (
+                    <LoadingSpinner />
+                  ) : user ? (
                     <div className="space-y-4">
                       <div className="flex items-center space-x-3">
                         <div className="h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">

@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 interface UserProfile {
   id: string;
@@ -30,7 +31,7 @@ interface UserProfile {
 }
 
 export function ProfilePage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -123,6 +124,10 @@ export function ProfilePage() {
       toast.error('Failed to update profile');
     }
   };
+
+  if (authLoading || loading) {
+    return <LoadingSpinner className="min-h-screen" size="lg" />;
+  }
 
   if (!user) {
     return (
