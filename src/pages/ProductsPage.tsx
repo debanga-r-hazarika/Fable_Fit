@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Filter,
   Grid,
   List,
-  SlidersHorizontal,
   X,
-  ChevronDown,
   Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -190,7 +187,7 @@ export function ProductsPage() {
       // Size filter (client-side since sizes is an array)
       if (filters.sizes.length > 0) {
         filteredProducts = filteredProducts.filter(product => 
-          product.sizes.some(size => filters.sizes.includes(size))
+          product.sizes.some((size: string) => filters.sizes.includes(size))
         );
       }
 
@@ -290,7 +287,7 @@ export function ProductsPage() {
       <div className="space-y-3">
         <h3 className="font-semibold text-gray-900">Sizes</h3>
         <div className="grid grid-cols-3 gap-2">
-          {sizes.map((size) => (
+          {sizes.map((size: string) => (
             <Button
               key={size}
               variant={filters.sizes.includes(size) ? "default" : "outline"}
@@ -389,7 +386,7 @@ export function ProductsPage() {
               <Sheet open={showFilters} onOpenChange={setShowFilters}>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="lg:hidden">
-                    <Filter className="h-4 w-4 mr-2" />
+                    <Search className="h-4 w-4 mr-2" />
                     Filters
                     {getActiveFiltersCount() > 0 && (
                       <Badge className="ml-2 h-5 w-5 p-0 text-xs">
@@ -424,7 +421,7 @@ export function ProductsPage() {
                     </button>
                   </Badge>
                 ))}
-                {filters.sizes.map((size) => (
+                {filters.sizes.map((size: string) => (
                   <Badge key={size} variant="secondary" className="px-2 py-1">
                     Size: {size}
                     <button

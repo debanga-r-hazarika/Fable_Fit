@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -14,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 interface DashboardStats {
   totalProducts: number;
@@ -22,6 +22,25 @@ interface DashboardStats {
   totalRevenue: number;
   recentOrders: any[];
   lowStockProducts: any[];
+}
+
+interface Order {
+  id: string;
+  profiles?: {
+    full_name?: string;
+    email?: string;
+  };
+  created_at: string;
+  total_amount: number;
+  payment_status: string;
+}
+
+interface Product {
+  id: string;
+  images: string[];
+  title: string;
+  price: number;
+  stock_count: number;
 }
 
 export function AdminDashboard() {
@@ -231,7 +250,7 @@ export function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               {stats.recentOrders.length > 0 ? (
-                stats.recentOrders.map((order) => (
+                stats.recentOrders.map((order: Order) => (
                   <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">
@@ -281,7 +300,7 @@ export function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               {stats.lowStockProducts.length > 0 ? (
-                stats.lowStockProducts.map((product) => (
+                stats.lowStockProducts.map((product: Product) => (
                   <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <img

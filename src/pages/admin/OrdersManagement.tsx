@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search,
-  Filter,
   Package,
   Truck,
   CheckCircle,
@@ -13,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +28,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
 
 interface Order {
   id: string;
@@ -226,7 +225,7 @@ export function OrdersManagement() {
             </CardContent>
           </Card>
         ) : (
-          filteredOrders.map((order, index) => {
+          filteredOrders.map((order: Order, index: number) => {
             const StatusIcon = statusIcons[order.shipping_status as keyof typeof statusIcons] || Clock;
             
             return (

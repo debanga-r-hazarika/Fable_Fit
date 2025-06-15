@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -7,7 +6,6 @@ import {
   ShoppingBag,
   MessageSquare,
   Users,
-  Settings,
   Menu,
   X,
   LogOut,
@@ -18,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },

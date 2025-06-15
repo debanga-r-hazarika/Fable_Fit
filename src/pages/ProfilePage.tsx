@@ -1,19 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   User,
-  Mail,
   Calendar,
   Edit,
   Save,
   X,
   Camera,
   Shield,
-  Bell,
-  Settings,
-  CreditCard,
-  MapPin,
-  Package
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -73,6 +68,7 @@ export function ProfilePage() {
             full_name: user.user_metadata?.full_name || '',
             email: user.email || '',
             is_admin: false,
+            created_at: new Date().toISOString(),
           };
           
           const { error: insertError } = await supabase

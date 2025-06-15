@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
+import { Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
+import { useState } from 'react';
 
 export function WishlistPage() {
   const { items, loading, removeFromWishlist } = useWishlist();
@@ -93,7 +93,6 @@ export function WishlistPage() {
                 <Button asChild size="lg">
                   <Link to="/products">
                     Continue Shopping
-                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
               </CardContent>
